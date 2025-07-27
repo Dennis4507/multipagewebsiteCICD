@@ -55,17 +55,75 @@ Website changes reflected on S3 bucket and live website.
 
 **Add CloudFront Invalidation**
 
-Since we added CloudFront which is a global cach that sits in front of the S3 Bucket, including an invalidation step to the CI/CD pipeline will guarantee our visitors always see the freshly
+Since we added CloudFront which is a global cache that sits in front of the S3 Bucket, including an invalidation step to the CI/CD pipeline will guarantee our visitors always see the freshly
 deployed and updated files instead of whatever is sitting in the edge caches.
 
 1. Get your CloudFront Distribution ID
 
-Go to the AWS Console → CloudFront → Your Distribution
+![alt text](<Bilder/Screenshot (276).png>)
 
-Copy the Distribution ID 
+2. Copy the Distribution ID 
 
-and add it 
+Pasted the Distribution ID onto GitHub Secrets
 
-into 
+![alt text](<Bilder/Screenshot (277).png>)
+
+3. then updated my deploy.yml:
+
+![alt text](<Bilder/Screenshot (278).png>)
+
+4. After deploying your files to S3, the .yml tells CloudFront to clear its cache and then tells CloudFront to pull the latest version of our site from S3
+
+5. Once set up we pushed a change to our master branch
+
+and received an Error.
+
+![alt text](<Bilder/Screenshot (279).png>)
+![alt text](<Bilder/Screenshot (280).png>)
+![alt text](<Bilder/Screenshot (281).png>)
+
+6. that error was as a result of my IAM user (github-actions-deploy) doesn’t have permission to invalidate CloudFront distributions.
+![alt text](<Bilder/Screenshot (282).png>)
+
+7. Solution: I needed to attach a Permission to my (github-actions-deploy) IAM Policy
+
+attach an inline policy
+
+![alt text](<Bilder/Screenshot (283).png>)
+![alt text](<Bilder/Screenshot (284).png>)
+
+8. Named the policy: AllowCloudFrontInvalidation
+
+9. Push a small change to your master branch (even just a space) to trigger the workflow again.
+This time it should
+
+![alt text](<Bilder/Screenshot (285).png>)
+
+10. Work. Success. CloudFront cache invalidated and my Website changes wer reflected.
+
+11. But had an issue that rendered my index.html or the website to be inaccessible after i pushed abunch of changes to Github. 
+
+![alt text](<Bilder/Screenshot (286).png>)
+
+12. I tried to Trouble Shoot The Issue (Check Blog) I wrote about this issue
+
+Checked S3 Bucket Policy & Permissions to see if Bucket policy allows public s3:GetObject on all objects but we didn't want full public access on the s3 Bucket.
+
+13. CloudFront Configuration see as it's the first line of defence.
+
+"Note" If you serve via CloudFront with Origin Access Control (OAC) or Origin Access Identity (OAI), ensure your S3 bucket policy grants access to CloudFront’s identity, not public.
+
+14. My goal is to have a public website behind CloudFront, keep Block Public Access on the S3 Bucket ON and configure the bucket policy to allow only CloudFront access.
+
+15. So i ensuredb CloudFront Used Origin Access Control (OAC) create a CloudFront Origin Access Control confirm it's attached to my distribution
+
+![alt text](<Bilder/Screenshot (287).png>)
+
+16. and i am able to push changes to AWS S3 via github actions and my website is visible and updates the changes pushed.
+
+
+
+
+
 
 
