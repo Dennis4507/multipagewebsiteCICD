@@ -53,3 +53,19 @@ Visit your website — it should reflect the changes automatically!
 Website changes reflected on S3 bucket and live website.
 
 
+**Add CloudFront Invalidation**
+
+Since we added CloudFront which is a global cach that sits in front of the S3 Bucket, including an invalidation step to the CI/CD pipeline will guarantee our visitors always see the freshly
+deployed and updated files instead of whatever is sitting in the edge caches.
+
+1. Get your CloudFront Distribution ID
+
+Go to the AWS Console → CloudFront → Your Distribution
+
+Copy the Distribution ID 
+
+and add it 
+
+into 
+
+
